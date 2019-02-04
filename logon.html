@@ -1,0 +1,460 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<!--
+Sinclair Community College
+Copyright 2017
+http://www.sinclair.edu/
+
+Designed by Marketing Services and Application Development
+Page Designed & Coded December 2017
+by Lance Smith and Joshua Moore, IT Application Development
+-->
+<head>
+	<title>Sinclair Portal</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+	<link rel="stylesheet" href="common/css/main.style.css"> <!-- TODO: MINIFY THIS PROD -->
+    <!-- fonts -->
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Open+Sans:300,400,600,700,800" type="text/css">
+	<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Serif+Pro:400,700" type="text/css">
+	<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Montserrat:400,700" type="text/css">
+    <!-- icon styles -->
+	<link href="common/css/style.css" rel="stylesheet"> <!-- TODO: MINIFY THIS PROD -->
+	<link href="sinclair_include/login_styles.css" rel="stylesheet" type="text/css" /> <!-- TODO: MINIFY THIS PROD -->
+	<link rel="shortcut icon" href="common/images/favicon.ico">
+    <script src="//code.jquery.com/jquery-2.2.2.min.js"></script>
+    <script src="js/shorten.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <script src="common/js/jquery.ticker.js"></script>
+	
+	
+	<style type="text/css">
+	
+	#LogonWidget1_SSO_1, #LogonWidget1_SSO_2, #LogonWidget1_SSO_3, #LogonWidget1_SSO_4, #LogonWidget1_SSO_5{
+		margin-bottom: 10px;
+		margin-top:10px;
+		margin-left:10px;
+		margin-right:10px;
+		border-radius:4px;
+		border:1px solid #ccc;
+		line-height:1.42857143;
+		font-size:14px;
+		height:34px;
+		padding:6px 12px;		
+	}/* Style the form fields */
+
+	@media (max-width: 500px){
+		#LogonWidget1_SSO_1, #LogonWidget1_SSO_2, #LogonWidget1_SSO_3, #LogonWidget1_SSO_4, #LogonWidget1_SSO_5{
+			max-width: 160px;
+		}
+	}/* Limit width on mobile */
+	
+	
+	
+	</style>
+	
+</head>
+
+
+
+	<!-- Google Analytics -->
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-5398632-6']);
+		_gaq.push(['_trackPageview']);
+		(function () {
+		 var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			//ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'https://www') + '.google-analytics.com/ga.js';
+			ga.src = 'https://ssl.google-analytics.com/ga.js';
+			(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ga);
+		})();
+	</script>
+
+	<!--<script type="text/javascript">
+		function recordOutboundLink(link, category, action) {
+			_gat._getTrackerByName()._trackEvent(category, action);
+			setTimeout('document.location = "' + link.href + '"', 100);
+		}
+		
+		//document.getElementById("alertSpan").textContent="Something something will be down for sometime.";
+	</script> -->
+	
+	<!-- Password Strength Validation -->
+	<script language="javascript" src="sinclair_include/passwordStrengthValidation.js"></script>
+
+	<!-- Default Site Javascript
+	<script type="text/css" src="scripts/basic.js"></script>
+	<script type="text/css" src="scripts/modernizr.js"></script> -->
+
+	<!-- SSO Logon Widget Javascript -->
+	<script language="javascript">
+		$(document).ready(function () {
+			if (FindSSOControl('LogonWidget1_SSO_4') != null) {
+				initPasswordConstraints();
+			}
+	
+			updateErrorMessage();
+	
+			if (FindSSOControl('LogonWidget1_SSO_2') != null) {
+				updateUserNameField();
+			}
+
+
+
+			//heat alerts
+		    $.getJSON('//rest.sinclair.edu/api/1/index.cfm/hdalerts.json', function (data) {
+		      var content_indi = "";
+		      var content_inner = "";
+		      var heat_modal = "";
+		      $.each(data.ROWS, function (i, obj) {
+		        content_inner += "<div class='item alert alert-warning alert-dismissible'><button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button><h2 class='page-header'><span class='glyphicon glyphicon-alert'></span> Attention!</h2><p class='alertContent'>";
+				if (this['DESCRIPTION'].length > 500) {
+					content_inner += this['DESCRIPTION'].substring(0,100) + '... <a href="#" data-toggle="modal" data-target=".bs-example-modal-lg">Read more</a>';
+				} else {
+					content_inner += this['DESCRIPTION'];
+				}
+				content_inner += "</p></div>";
+				content_inner += "<div class='modal fade bs-example-modal-lg' role=dialog tabindex=-1 aria-labelledby=myLargeModalLabel> <div class='modal-dialog modal-lg' role=document> <div class=modal-content> <div class=modal-header> <button type=button class=close data-dismiss=modal aria-label=Close><span aria-hidden=true>&times;</span></button> <h4 class=modal-title id=myLargeModalLabel>Alert Message</h4> </div> <div class=modal-body> " + this['DESCRIPTION'] + " </div> </div> </div> </div>";
+
+		      });
+		      $('#car_id').html(content_indi);
+		      $('#car_inner').html(content_inner);
+		      $('#car_inner .item').first().addClass('active');
+		    });
+
+		    //alert.sinclair
+		    $.getJSON('//rest.sinclair.edu/api/1/index.cfm/emAlerts.json', function (data) {
+		      var content_indi = "";
+		      var content_inner = "";
+		      $.each(data.ROWS, function (i, obj) {
+		        content_inner += "<div class='item alert alert-danger alert-dismissible'><button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button><h2 class='page-header'><span class='glyphicon glyphicon-alert'></span> Attention!</h2><p class='alertContent'>";
+				if (this['MESSAGE'].length > 500) {
+					content_inner += this['MESSAGE'].substring(0,100) + '... <a href="#" data-toggle="modal" data-target=".bs-example-modal-lg">Read more</a>';
+				} else {
+					content_inner += this['MESSAGE'];
+				}
+				content_inner += "</p></div>";
+				content_inner += "<div class='modal fade bs-example-modal-lg' role=dialog tabindex=-1 aria-labelledby=myLargeModalLabel> <div class='modal-dialog modal-lg' role=document> <div class=modal-content> <div class=modal-header> <button type=button class=close data-dismiss=modal aria-label=Close><span aria-hidden=true>&times;</span></button> <h4 class=modal-title id=myLargeModalLabel>Alert Message</h4> </div> <div class=modal-body> " + this['MESSAGE'] + " </div> </div> </div> </div>";
+
+		      });
+		      $('#car_id').html(content_indi);
+		      $('#alert_inner').html(content_inner);
+		      $('#alert_inner .item').first().addClass('active');
+		    });
+
+		});
+	</script>
+<body>
+<!-- Fixed navbar -->
+<nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-3">
+                <a href="logon.aspx"><img src="common/images/logo.png" class="img-responsive logo" alt="Sinclair College" /></a>
+            </div>
+        </div>
+    </div>
+</nav>
+    <!-- main content -->
+    <div class="container">
+    <div class="row" style="border-radius: 10px; padding:20px; background-color: #fff; border:solid thin #cccccc; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0);">
+    <!-- nav -->
+    <div class="col-lg-3 hidden-xs">
+        <div class="sidebar">
+            <h3>Connect with Sinclair</h3>
+            <div class="social-icons">
+                <a href="https://www.facebook.com/sinclaircommunitycollege" target="_blank"><span class="icon-mysinclair-icons_facebook socialLink" style="font-size:30px;"></span></a>
+                <a href="https://twitter.com/SinclairCC/" target="_blank"><span class="icon-mysinclair-icons_twitter" style=" font-size:30px;"></span></a>
+                <a href="https://www.youtube.com/user/SinclairCC" target="_blank"><span class="icon-mysinclair-icons_youtube" style="font-size:30px;"></span></a>
+                <a href="https://www.instagram.com/sinclaircollege/ " target="_blank"><span class="icon-mysinclair-icons_instagram" style="font-size:30px;"></span></a>
+            </div>
+			
+            <p><h4><strong>Need Help?</strong></h4></p>
+            
+            <p><a href="https://it.sinclair.edu/services/student-and-guests-services/account-and-password-information/accessing-your-account/" target="_blank">Accessing your account</a></p>
+            
+            <p><strong>Technical Support</strong><br/>
+            
+            Browse our <a href="https://www.sinclair.edu/help/" target="_blank">Frequently Asked Questions</a><br />
+            or contact the <a href="https://it.sinclair.edu/help-support/" target="_blank">Technical Help Desk</a> at<br />
+            937-512-4357.</p>
+            
+            <p><strong>General Assistance</strong><br />
+            Contact the Sinclair Communications Center at 1-800-315-3000.</p>
+            
+            <p>Login Server: HIRO</p>
+        </div>
+    </div>
+    <!-- main content -->
+	
+    <div class="col-lg-9">
+    	<div id="login">
+                <h1 style="color: #AC1A2F;"><span class="glyphicon glyphicon-lock"></span> Welcome to Sinclair</h1>
+				<!-- alerts.sinclair -->
+				<div id="carousel-example-generic" class="carousel slide" data-ride="carousel" data-interval="9000">
+				    <div class="carousel-inner" id="alert_inner"></div>
+				</div>
+               	<!-- heat Carousel -->
+				<div id="closing" class="carousel slide" data-ride="carousel" data-interval="9000">
+				    <div class="carousel-inner" id="car_inner"></div>
+				</div>
+
+
+<!-- ALERTS -->
+<!--<script>
+  $(window).load(function() {
+    var alertInfo = "https://rest.sinclair.edu/api/1/index.cfm/hdalerts.json";
+    $.getJSON( alertInfo, {
+      format: "json"
+    })
+    .done(function( data ) {
+    console.log('d:',data);
+      $.each( data, function( k, v ) {
+      $("#alertSpan").append('\xa0' + '\xa0' + alertInfo.DESCRIPTION);
+      $("#alertSpan2").append('\xa0' + '\xa0' + alertInfo.DESCRIPTION);
+      if ( i === 5 ) {
+        return false;
+      }
+      if ( i >= 2) {
+        $('#myModal').modal('show');
+      }
+      });
+    });
+  })();
+</script>-->
+                <!-- Password Checker Javascript -->
+				<script language=javascript>
+					<!--
+					/* if(window.top != window)
+					{window.top.location = document.location;} */
+					window.name = "ssoLogon";
+					var ssoTestCookieName = "_V";
+					function getCookie(name, defaultValue) {
+						defaultValue = typeof (defaultValue) == "string" ? defaultValue : null;
+						var docCookie = document.cookie;
+						var prefix = name + "=";
+						var begin = docCookie.indexOf("; " + prefix);
+						if (begin == -1) {
+							begin = docCookie.indexOf(prefix);
+							if (begin != 0) {
+								return defaultValue;
+							}
+						} else {
+							begin += 2;
+						}
+						var end = docCookie.indexOf(";", begin);
+						if (end == -1) {
+							end = docCookie.length;
+						}
+						return unescape(docCookie.substring(begin + prefix.length, end));
+					}
+				
+					function updateErrorMessage() {
+						try {
+							var divs = document.getElementsByTagName("div");
+							var widgetWrapper;
+							for (var d = 0; d < divs.length; d++) {
+								if (divs[d].className != null) {
+									if (divs[d].className == "WidgetWrapper") {
+										widgetWrapper = divs[d];
+										break;
+									}
+								}
+							}
+							var spans = widgetWrapper.getElementsByTagName("span");
+							for (var i = 0; i < spans.length; i++) {
+								var spanHtml = spans[i].innerHTML;
+				
+								// Edit error messages here
+								if (spanHtml.indexOf("0x8007202F") != -1) {  // Constraint Violation
+									spans[i].innerHTML = "<font color=\"#FF0000\">Constraint Violation: The system was unable to reset your password. This could be due to not entering your current password correctly or for failure to meet the password policy requirements. The new password cannot contain part of your name or account name, cannot match any of your last thirteen (13) passwords, and it must be a minimum of eight (8) characters. It must also contain a combination of three (3) of the following: upper case letters, lower case letters, numbers or symbols.</font>";
+								} else if (spanHtml.indexOf("0x800708C5") != -1) { // Password Complexity Error
+									spans[i].innerHTML = "<font color=\"#FF0000\">Password Complexity Error: The system was unable to reset your password. This could be due to not entering your current password correctly or for failure to meet the password policy requirements. The new password cannot contain part of your name or account name, cannot match any of your last thirteen (13) passwords, and it must be a minimum of eight (8) characters. It must also contain a combination of three (3) of the following: upper case letters, lower case letters, numbers or symbols.</font>";
+								}
+							}
+						} catch (e) { }
+					}	
+													
+					//-->
+				</script>
+                
+				<!-- ------------------------------------ -->
+				<div class="panel panel-default">
+				  <div class="panel-heading login">
+				    <h3 class="panel-title">Login</h3>
+				  </div>
+				  <div class="panel-body">
+				  <p>Sinclair websites are optimized for the following web browsers: <a href="https://www.google.com/chrome/?brand=CHBD&gclid=CjwKCAiAt4rfBRBKEiwAC678KX2arQWgmA0ba_73i7QrqKd8jcoPCg6kmX_Om7GLgU8B55XzHbzVFRoCgmkQAvD_BwE&gclsrc=aw.ds" target="_blank">Google Chrome</a>, <a href="https://www.mozilla.org/en-US/firefox/new/" target="_blank">Firefox</a>, and <a href="https://support.apple.com/en_GB/downloads/safari" target="_blank">Safari (Mac)</a>. Please use one of these browsers for the best experience.</p>
+				  <p>Sinclair websites are optimized for the following web browsers: <a href="https://www.google.com/chrome/?brand=CHBD&gclid=CjwKCAiAt4rfBRBKEiwAC678KX2arQWgmA0ba_73i7QrqKd8jcoPCg6kmX_Om7GLgU8B55XzHbzVFRoCgmkQAvD_BwE&gclsrc=aw.ds" target="_blank">Google Chrome</a>, <a href="https://www.mozilla.org/en-US/firefox/new/" target="_blank">Firefox</a>, and <a href="https://support.apple.com/en_GB/downloads/safari" target="_blank">Safari (Mac)</a>. Please use one of those browsers for the best experience.</p>
+				  	<!-- LOGIN FORM -->
+					<form name="Form1" method="post" action="logon.aspx?ru=aHR0cHM6Ly9teS5zaW5jbGFpci5lZHUvX3NhbWwvcG9zdC5hc3B4P0MzQzdDMjJEQTA4NTQ5NkI5MjJGQkZFRTZGNzBENkY3PUE3NEJGRDE2NTQ0QzQ0MEM5Qzc2MDlFNjBCQ0QzN0Qy&amp;RelayState=%2fcontent%2fenforced%2f136135-269468%2fContent%2f2018+Assignment+Revisions%2f04.+Fourth+Assignment+-+Calculator+with+Methods.pdf" id="Form1" onsubmit="javascript:return SubmitForm();">
+<div>
+<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="/wEPDwUKMTA1NTA1MjM0Mw9kFgJmDxYCHghvbnN1Ym1pdAUfamF2YXNjcmlwdDpyZXR1cm4gU3VibWl0Rm9ybSgpO2QYAQUeX19Db250cm9sc1JlcXVpcmVQb3N0QmFja0tleV9fFgQFG0xvZ29uV2lkZ2V0MSRzc29Mb2dpbkJ1dHRvbgUcTG9nb25XaWRnZXQxJHNzb0xvZ291dEJ1dHRvbgUkTG9nb25XaWRnZXQxJHNzb0NoYW5nZVBhc3N3b3JkQnV0dG9uBSRMb2dvbldpZGdldDEkc3NvVXBkYXRlUGFzc3dvcmRCdXR0b26pcP677ns7Pk/NIbbq9pqGjJV+Gw==" />
+</div>
+
+
+<script language=javascript src="/_auth/include/Encryption.js" ></script>
+
+<script language=javascript>
+<!--
+	 var SSO_EncryptedPostDataIsRequired = false;
+	 _K3 = "AD45";
+	 _K4 = "C30507BA5190FEB4B8271EA406851271";
+	 var SSO_Username_ID = "LogonWidget1_SSO_2";
+	 var SSO_Password_ID = "LogonWidget1_SSO_3";
+	 var SSO_NewPassword_ID = "LogonWidget1_SSO_4";
+	 var SSO_ConfirmPassword_ID = "LogonWidget1_SSO_5";
+
+function SSO_PreProcess()
+{
+	if (SSO_EncryptedPostDataIsRequired==true)
+	{
+		_S1();
+		EncryptVal(SSO_Username_ID,"SSO_ENC_2");
+		EncryptVal(SSO_Password_ID,"SSO_ENC_3");
+		EncryptVal(SSO_NewPassword_ID,"SSO_ENC_4");
+		EncryptVal(SSO_ConfirmPassword_ID,"SSO_ENC_5");
+	}
+	
+}
+
+function EncryptVal(Source, Destination )
+{
+	var oSource = FindSSOControl(Source);
+	var oDest = FindSSOControl(Destination);
+	if ((oSource != null) && (oDest != null))
+	{
+		oDest.value = _S4(oSource.value);
+		oSource.value="";
+	}
+}
+
+
+function FindSSOControl(ID) 
+{
+	if (document.getElementById)
+	{
+		var oControl = document.getElementById(ID);
+		return oControl;
+	}
+	else
+	{
+		for( var iLoop = 0; iLoop < document.forms.length; iLoop++ ) 
+		{
+			var oForm = document.forms[iLoop];
+			var oControl = oForm[ID];
+			if ( oControl != null ) 
+			{
+				return oControl;
+			}
+		}
+	}
+	return null;
+} 
+
+
+function SubmitForm() {	 SSO_PreProcess();	 return true;}//-->
+</script>
+
+<input type="hidden" name="SSO_ENC_1" id="SSO_ENC_1" value="21" />
+<input type="hidden" name="SSO_ENC_2" id="SSO_ENC_2" value="" />
+<input type="hidden" name="SSO_ENC_3" id="SSO_ENC_3" value="" />
+<input type="hidden" name="SSO_ENC_4" id="SSO_ENC_4" value="" />
+<input type="hidden" name="SSO_ENC_5" id="SSO_ENC_5" value="" />
+
+<div>
+
+	<input type="hidden" name="__VIEWSTATEGENERATOR" id="__VIEWSTATEGENERATOR" value="4F3B2B12" />
+	<input type="hidden" name="__EVENTVALIDATION" id="__EVENTVALIDATION" value="/wEWBgLn5N/NAQK+kr2wBgKhw6WtBgLRmZw4AtGZmDgCz5TFlQtWJjXW9XbblvscBipNLoBbgPzRjw==" />
+</div>
+                <input type="hidden" name="hfUsername" id="hfUsername" />
+                <input type="hidden" name="hfAccountName" id="hfAccountName" />
+            <div id="tdMessageArea" class="loginMessageArea">
+              <div id="divLogonWidget">
+                <div class="WidgetWrapper"><div align="center" id="divPleaseWait" style="width:100%;display:none;"><B>Please Wait...</B></div><div id="divLogonForm" style="display:inline;"><B>To log in, enter your username and password below:</B><table cellpadding="1" cellspacing="0" border="0"><tr><td>Username:</td><td colspan="2"><input name="LogonWidget1$SSO_2" type="text" id="LogonWidget1_SSO_2" onkeypress="if((event&amp;&amp;event.keyCode==13)||(event&amp;&amp;event.which==13)){document.getElementById('LogonWidget1_ssoLoginButton').click();return false;}" style="width:100%;" /></td></tr><tr><td>Password:</td><td><input name="LogonWidget1$SSO_3" type="password" id="LogonWidget1_SSO_3" onkeypress="if((event&amp;&amp;event.keyCode==13)||(event&amp;&amp;event.which==13)){document.getElementById('LogonWidget1_ssoLoginButton').click();return false;}" /></td><td align="left"><input type="image" name="LogonWidget1$ssoLoginButton" id="LogonWidget1_ssoLoginButton" src="/_auth/images/icon_login.gif" alt="Login" onclick="setTimeout( function() { document.getElementById('divPleaseWait').style.display='inline';document.getElementById('divLogonForm').style.display='none'; }, 100 );return true;" style="border-style:None;border-width:0px;" /></td></tr><tr><td colspan="3" align="center"></td></tr></table></div></div>
+              </div>
+
+              <div id="divLogonMessage" style="display:inline;">
+                Please wait&hellip;
+              </div>
+              <div id="divCookieError"  style="display:none;">
+                Your browser does not seem to support cookies, please enable cookies for this domain and try again.
+              </div>
+              <script language="javascript">
+                <!--
+                // test JavaScript and Cookies   
+                var cookValue = getCookie(ssoTestCookieName, "");
+                if (!cookValue || cookValue.length == 0) {
+                  document.getElementById("divLogonMessage").style.display = "none";
+                  document.getElementById("divCookieError").style.display = "inline";
+                }
+                else {
+                  document.getElementById("divLogonMessage").style.display = "none";
+                  document.getElementById("divLogonWidget").style.display = "inline";
+                }
+                //-->
+              </script>
+                </div>
+          </form>
+			<!-- end form scripts and content -->
+
+			  <!-- ------------------------------------ -->
+			  		<div class="form-group">
+			  			<div class="col-lg-4 text-center">
+					  		<span>
+					  			<a href="HTTPS://services.sinclair.edu:443/WebAdvisor/WebAdvisor?TOKENIDX=2737180849&amp;CONSTITUENCY=WBST&amp;type=P&amp;pid=CORE-WBCOS005">
+					  			Find Username</a> / <a href="https://reset.sinclair.edu/">Forgot Password?</a>
+					  		</span>
+			  			</div>
+			  		</div>
+					<div id="rules" class="hideRules">
+						<span id="requiredCriteriaCategory" class="invalidCategoryIcon">&nbsp;</span><span class="title">Password Requirements:</span>
+						<div class="ruleSectionRequired">
+							<div id="passwordLength" class="invalidRule"><span id="passwordLengthRuleIcon" class="invalidSubCategoryIcon"></span>8 characters or greater with no spaces or apostrophes</div>
+							<div id="passwordAccountName" class="validRule"><span id="accountNameRuleIcon" class="validSubCategoryIcon"></span>Your password cannot contain your Username</div>
+						</div>
+						
+						<span id="optionalCriteriaCategory" class="invalidCategoryIcon">&nbsp;</span><span class="title">Must include three out of four:</span>
+						<div class="ruleSectionOptional">
+							<div id="passwordLower" class="invalidRule"><span id="lowercaseRuleIcon" class="invalidSubCategoryIcon"></span>At least one lowercase character (a-z)</div>
+							<div id="passwordUpper" class="invalidRule"><span id="uppercaseRuleIcon" class="invalidSubCategoryIcon"></span>At least one uppercase character (A-Z)</div>
+							<div id="passwordNumeric" class="invalidRule"><span id="numbericRuleIcon" class="invalidSubCategoryIcon"></span>At least one number (0-9)</div>
+							<div id="passwordSpecial" class="invalidRule"><span id="specialCharacterRuleIcon" class="invalidSubCategoryIcon"></span>At least one special character with no spaces or apostrophes</div>
+						</div>
+					</div>
+
+
+
+			  		<div class="clear"></div>
+	                <!-- warning messages
+	            	<p style="margin-top:20px;" class="alert alert-danger"><span class="glyphicon glyphicon-exclamation-sign"></span> Wrong username or password. <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a></p> -->
+            	</div>
+				</div>
+				</div>
+			<!-- PARENTS LOGIN -->
+			<div class="panel panel-default">
+			  <div class="panel-heading">
+			    <h3 class="panel-title">Proxy Login</h3>
+			  </div>
+			  <div class="panel-body">
+			  	<p><b>Proxy log in is for those who have access to represent a student in our Self-Service system.  This requires access given by the student.</b></p>
+			    <a href="https://perproxy-statement1.sinclair.edu/Student" target="_blank">To login please click here</a>
+			  </div>
+			</div>
+		</div>
+	</div>
+</div>
+<footer class="footer">
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-12">
+				<p class="text-muted">&copy; Sinclair Community College, All Rights Reserved. | <a href="http://www.sinclair.edu/about/information/privacy/index.cfm">Privacy Statement</a> | <a href="http://it.sinclair.edu/index.cfm/services/student-and-guests-services/policies-and-security-information/information-security-policy/">Security Policy</a> | <a href="http://www.sinclair.edu/accessibility">Accessibility</a></p>		
+			</div>
+        </div>
+	</div>
+</footer>
+<!-- complex requirement validation rules -->
+</body>
+</html>
